@@ -1,0 +1,109 @@
+{
+  "info": {
+    "name": "survey-api",
+    "_postman_id": "8f2f0c1e-0000-4a2a-bbbb-000000surveyapi",
+    "description": "Survey Feedback API — Auth basics (register, login, me). JWT is saved from /api/login to the environment as {{access_token}} and used for protected routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{access_token}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"eva@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
+            },
+            "description": "Creates a responder and returns a JWT token."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (stores token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  const token = json?.data?.token || json?.token;",
+                  "  pm.expect(token, 'token should exist in response').to.be.a('string');",
+                  "  pm.environment.set('access_token', token);",
+                  "  console.log('JWT saved to environment as access_token');",
+                  "} catch (e) {",
+                  "  console.error('Failed to parse token:', e);",
+                  "  pm.test('Token present', function(){ throw new Error('No token in response'); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"eva@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
+            },
+            "description": "Logs in a responder and saves the JWT to {{access_token}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Me (protected)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{access_token}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "me"]
+            },
+            "description": "Returns the current responder. Requires Bearer {{access_token}}."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": []
+}
