@@ -29,7 +29,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"eva@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
+              "raw": "{\n  \"email\": \"evina@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
             },
             "description": "Creates a responder and returns a JWT token."
           },
@@ -73,7 +73,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"eva@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
+              "raw": "{\n  \"email\": \"evina@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
             },
             "description": "Logs in a responder and saves the JWT to {{access_token}}."
           },
