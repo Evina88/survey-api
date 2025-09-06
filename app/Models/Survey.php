@@ -19,4 +19,9 @@ class Survey extends Model
     {
         return $query->where('status', 'active');
     }
+    
+     public function questions()
+    {
+        return $this->hasMany(Question::class);
+    }
 }

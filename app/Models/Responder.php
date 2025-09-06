@@ -30,4 +30,9 @@ class Responder extends Authenticatable implements JWTSubject
     {
         return [];
     }
+    
+    public function answers()
+    {
+        return $this->hasMany(Answer::class);
+    }
 }
