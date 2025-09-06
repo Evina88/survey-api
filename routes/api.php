@@ -20,14 +20,10 @@ use App\Http\Controllers\SurveySubmissionController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
-Route::middleware('auth:api')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
-});
-
 Route::get('/surveys',       [SurveyController::class, 'index']);
 Route::get('/surveys/{id}',  [SurveyController::class, 'show']);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'throttle:30,1'])->group(function () {
     Route::post('/surveys/{id}/submit', [SurveySubmissionController::class, 'submit']);
     Route::get('/me', [AuthController::class, 'me']);
 });
