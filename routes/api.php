@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SurveyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,9 +16,12 @@ use App\Http\Controllers\AuthController;
 |
 */
 
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login',    [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login',    [AuthController::class, 'login']);
 
-    Route::middleware('auth:api')->group(function () {
-        Route::get('/me', [AuthController::class, 'me']);
-    });
+Route::middleware('auth:api')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+});
+
+Route::get('/surveys',       [SurveyController::class, 'index']); 
+Route::get('/surveys/{id}',  [SurveyController::class, 'show']);
