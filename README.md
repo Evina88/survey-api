@@ -83,61 +83,87 @@ This creates the `survey-submissions` index with correct mapping so mixed answer
 ### Steps
 
 **1. Clone the repository**
+
+```bash
 git clone https://github.com/YOUR_USERNAME/survey-api.git
 cd survey-api
-
+```
+<br>
 **2. Install dependencies**
-composer install
 
+```bash
+composer install
+```
+<br>
 **3. Copy the example environment file and set credentials**
+
+```bash
 cp .env.example .env
 php artisan key:generate
-
+```
+<br>
 
 **Minimum required env vars:**
+<br>
 
-DB_CONNECTION=mysql
+- DB_CONNECTION=mysql
 
-DB_HOST=127.0.0.1
+- DB_HOST=127.0.0.1
 
-DB_PORT=3306
+- DB_PORT=3306
 
-DB_DATABASE=survey_api
+- DB_DATABASE=survey_api
 
-DB_USERNAME=root
+- DB_USERNAME=root
 
-DB_PASSWORD=secret
-
-
-JWT_SECRET=your_jwt_secret_key
+- DB_PASSWORD=secret
 
 
-# Elasticsearch
-ELASTICSEARCH_ENABLED=true
-ELASTICSEARCH_HOST=http://localhost:9200
-ELASTICSEARCH_INDEX=survey-submissions
-ELASTICSEARCH_TIMEOUT=3
-
-
-4. Run migrations & seeders
+- JWT_SECRET=your_jwt_secret_key
+<br>
+**4. Run migrations & seeders**
+  
+```bash
 php artisan migrate --seed
+```
+<br>
 
+**5. Start the server**
 
-5. Start the server
+```bash
 php artisan serve
-# http://127.0.0.1:8000
+```
+<br>
 
-Elasticsearch Setup 
+### Elasticsearch Setup
+
+Vars for .env
+
+- ELASTICSEARCH_ENABLED=true
+
+- ELASTICSEARCH_HOST=http://localhost:9200
+
+- ELASTICSEARCH_INDEX=survey-submissions
+
+- ELASTICSEARCH_TIMEOUT=3
+<br>
+
+### Steps 
+
 1. Install Docker Desktop
 
 Download and install Docker Desktop:
 👉 https://www.docker.com/products/docker-desktop
 
+
 Make sure Docker Desktop is running before continuing.
+
+
 
 2. Run Elasticsearch container
 
 Open your terminal and run:
+
 
 docker run --name es-dev \
   -p 9200:9200 \
@@ -146,9 +172,15 @@ docker run --name es-dev \
   -e ES_JAVA_OPTS="-Xms512m -Xmx512m" \
   docker.elastic.co/elasticsearch/elasticsearch:8.14.0
 
+  
+
   Keep that terminal/window open while you test. If you need to stop later:
+  
     docker stop es-dev
+    
     docker rm es-dev
+
+    
 
 ---    
 ### 📬 Postman Collection
@@ -171,16 +203,19 @@ Register → Login → Token is stored automatically → Access protected endpoi
 ---
 ✅ Endpoints Summary
 
-Endpoint	                Method	    Auth	 Description
+| Endpoint                                             | Method | Auth | Description                            |
+|------------------------------------------------------|--------|------|-----------------------------------------
+| /api/register                                        | POST   | ❌   | Register a responder                   |
+| /api/login                                           | POST   | ❌   | Login, returns JWT                     |
+| /api/me                                              | GET    | ✅   | Get current responder                  |
+| /api/surveys                                         | GET    | ❌   | List active surveys                    |
+| /api/surveys/{id}                                    | GET    | ✅   | Survey details + questions             |       
+| /api/surveys/{id}/submit                             | POST   | ✅   | Submit survey answers                  |
+| http://localhost:9200/survey-submissions             | PUT    | ❌   | Create index (one-time, safe mapping)  |
+| http://localhost:9200/survey-submissions/_search     | POST   | ❌   | Search submissions by survey_id = 1    |
 
-/api/register	            POST	    ❌	    Register a responder
-/api/login	                POST	    ❌	    Login, returns JWT
-/api/me	                    GET	        ✅	    Get current responder
-/api/surveys	            GET	        ❌	    List active surveys 
-/api/surveys/{id}	        GET	        ✅	    Survey details + questions
-/api/surveys/{id}/submit	POST	    ✅	    Submit survey answers
+---
 
---
 📝 Notes
 Passwords are hashed with bcrypt.
 
