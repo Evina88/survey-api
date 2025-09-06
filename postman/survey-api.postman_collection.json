@@ -2,7 +2,7 @@
   "info": {
     "name": "survey-api",
     "_postman_id": "8f2f0c1e-0000-4a2a-bbbb-000000surveyapi",
-    "description": "Survey Feedback API — Endpoints for authentication, surveys, and submissions. JWT is saved from /api/login to the environment as {{access_token}} and used for protected routes.",
+    "description": "Survey Feedback API — Auth, Surveys, Submissions, plus Elasticsearch bonus integration.\nLogin saves JWT to {{access_token}}; ES index bootstrap and search included.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -20,7 +20,8 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
             ],
             "url": {
               "raw": "{{base_url}}/api/register",
@@ -31,9 +32,8 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"evina@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
             },
-            "description": "Creates a responder and returns a JWT token."
-          },
-          "response": []
+            "description": "Create a responder and return a JWT."
+          }
         },
         {
           "name": "Login (stores token)",
@@ -43,20 +43,12 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "try {",
-                  "  const json = pm.response.json();",
-                  "  const token = json?.data?.token || json?.token;",
-                  "  pm.expect(token, 'token should exist in response').to.be.a('string');",
-                  "  pm.environment.set('access_token', token);",
-                  "  console.log('JWT saved to environment as access_token');",
-                  "} catch (e) {",
-                  "  console.error('Failed to parse token:', e);",
-                  "  pm.test('Token present', function(){ throw new Error('No token in response'); });",
-                  "}"
+                  "pm.test('Status is 200', function(){ pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "const token = json?.data?.token || json?.token;",
+                  "pm.expect(token, 'token should exist').to.be.a('string');",
+                  "pm.environment.set('access_token', token);",
+                  "console.log('JWT saved to environment as access_token');"
                 ]
               }
             }
@@ -64,7 +56,8 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
             ],
             "url": {
               "raw": "{{base_url}}/api/login",
@@ -75,19 +68,13 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"evina@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
             },
-            "description": "Logs in a responder and saves the JWT to {{access_token}}."
-          },
-          "response": []
+            "description": "Login and store JWT as {{access_token}}."
+          }
         },
         {
           "name": "Me (protected)",
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                { "key": "token", "value": "{{access_token}}", "type": "string" }
-              ]
-            },
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
             "method": "GET",
             "header": [
               { "key": "Accept", "value": "application/json" }
@@ -97,9 +84,8 @@
               "host": ["{{base_url}}"],
               "path": ["api", "me"]
             },
-            "description": "Returns the current responder. Requires Bearer {{access_token}}."
-          },
-          "response": []
+            "description": "Returns current responder. Requires Bearer {{access_token}}."
+          }
         }
       ]
     },
@@ -117,13 +103,11 @@
               "raw": "{{base_url}}/api/surveys",
               "host": ["{{base_url}}"],
               "path": ["api", "surveys"]
-            },
-            "description": "Lists all active surveys."
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "Get Survey Details",
+          "name": "Get Survey Details (with Questions)",
           "request": {
             "method": "GET",
             "header": [
@@ -133,10 +117,8 @@
               "raw": "{{base_url}}/api/surveys/1",
               "host": ["{{base_url}}"],
               "path": ["api", "surveys", "1"]
-            },
-            "description": "Get a specific survey by ID with its questions."
-          },
-          "response": []
+            }
+          }
         }
       ]
     },
@@ -144,17 +126,13 @@
       "name": "Submissions (protected)",
       "item": [
         {
-          "name": "Submit Survey Answers",
+          "name": "Submit Survey Answers (survey 1)",
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                { "key": "token", "value": "{{access_token}}", "type": "string" }
-              ]
-            },
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
             ],
             "url": {
               "raw": "{{base_url}}/api/surveys/1/submit",
@@ -163,24 +141,58 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"responses\": [\n    { \"question_id\": 1, \"value\": 4 },\n    { \"question_id\": 2, \"value\": \"Loved the packaging and delivery time.\" },\n    { \"question_id\": 3, \"value\": \"Yes\" }\n  ]\n}"
+              "raw": "{\n  \"responses\": [\n    { \"question_id\": 1, \"value\": 5 },\n    { \"question_id\": 2, \"value\": \"Great product!\" },\n    { \"question_id\": 3, \"value\": \"Yes\" }\n  ]\n}"
             },
-            "description": "Submit answers to survey 1. Requires Bearer {{access_token}}."
-          },
-          "response": []
+            "description": "Submit answers for survey #1. Requires Bearer {{access_token}}."
+          }
         }
       ]
+    },
+    {
+      "name": "Elasticsearch (bonus)",
+      "item": [
+        {
+          "name": "Create index (one-time, safe mapping)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{es_host}}/{{es_index}}",
+              "host": ["{{es_host}}"],
+              "path": ["{{es_index}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mappings\": {\n    \"properties\": {\n      \"survey_id\":    { \"type\": \"integer\" },\n      \"responder_id\": { \"type\": \"integer\" },\n      \"submitted_at\": { \"type\": \"date\" },\n      \"ip\":           { \"type\": \"ip\" },\n      \"user_agent\":   { \"type\": \"keyword\" },\n      \"answers\": {\n        \"type\": \"nested\",\n        \"properties\": {\n          \"question_id\":  { \"type\": \"integer\" },\n          \"responder_id\": { \"type\": \"integer\" },\n          \"response_data\": { \"enabled\": false }\n        }\n      }\n    }\n  }\n}"
+            },
+            "description": "Bootstraps the index with a mapping that stores response_data without analyzing it (prevents mixed-type errors)."
+          }
+        },
+        {
+          "name": "Search submissions by survey_id = 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{es_host}}/{{es_index}}/_search",
+              "host": ["{{es_host}}"],
+              "path": ["{{es_index}}", "_search"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": { \"term\": { \"survey_id\": 1 } }\n}"
+            },
+            "description": "Verifies that survey submissions are indexed."
+          }
+        }
+      ],
+      "description": "Bonus: ES logging. Use Create index once, then submit answers, then run the search."
     }
   ],
   "event": [],
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://127.0.0.1:8000"
-    },
-    {
-      "key": "access_token",
-      "value": ""
-    }
-  ]
+  "variable": []
 }

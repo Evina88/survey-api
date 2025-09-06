@@ -31,4 +31,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'elasticsearch' => [
+        'enabled'  => env('ELASTICSEARCH_ENABLED', false),
+        'host'     => env('ELASTICSEARCH_HOST', null),       // e.g. http://localhost:9200
+        'username' => env('ELASTICSEARCH_USERNAME', null),   // optional
+        'password' => env('ELASTICSEARCH_PASSWORD', null),   // optional
+        'index'    => env('ELASTICSEARCH_INDEX', 'survey-submissions'),
+        'timeout'  => env('ELASTICSEARCH_TIMEOUT', 3),       // seconds
+    ],
+
 ];
