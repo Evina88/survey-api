@@ -2,7 +2,7 @@
   "info": {
     "name": "survey-api",
     "_postman_id": "8f2f0c1e-0000-4a2a-bbbb-000000surveyapi",
-    "description": "Survey Feedback API — Auth basics (register, login, me). JWT is saved from /api/login to the environment as {{access_token}} and used for protected routes.",
+    "description": "Survey Feedback API — Endpoints for authentication, surveys, and submissions. JWT is saved from /api/login to the environment as {{access_token}} and used for protected routes.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -102,8 +102,85 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Surveys (public)",
+      "item": [
+        {
+          "name": "List Active Surveys",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/surveys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys"]
+            },
+            "description": "Lists all active surveys."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Survey Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/surveys/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "1"]
+            },
+            "description": "Get a specific survey by ID with its questions."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Submissions (protected)",
+      "item": [
+        {
+          "name": "Submit Survey Answers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{access_token}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/surveys/1/submit",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "1", "submit"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responses\": [\n    { \"question_id\": 1, \"value\": 4 },\n    { \"question_id\": 2, \"value\": \"Loved the packaging and delivery time.\" },\n    { \"question_id\": 3, \"value\": \"Yes\" }\n  ]\n}"
+            },
+            "description": "Submit answers to survey 1. Requires Bearer {{access_token}}."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "event": [],
-  "variable": []
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ]
 }
