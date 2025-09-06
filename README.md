@@ -86,24 +86,31 @@ This creates the `survey-submissions` index with correct mapping so mixed answer
 git clone https://github.com/YOUR_USERNAME/survey-api.git
 cd survey-api
 
-**2. Install dependencies
+**2. Install dependencies**
 composer install
 
-**3. Copy the example environment file and set credentials
+**3. Copy the example environment file and set credentials**
 cp .env.example .env
 php artisan key:generate
 
 
-**Minimum required env vars:
+**Minimum required env vars:**
 
 DB_CONNECTION=mysql
+
 DB_HOST=127.0.0.1
+
 DB_PORT=3306
+
 DB_DATABASE=survey_api
+
 DB_USERNAME=root
+
 DB_PASSWORD=secret
 
+
 JWT_SECRET=your_jwt_secret_key
+
 
 # Elasticsearch
 ELASTICSEARCH_ENABLED=true
