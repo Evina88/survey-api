@@ -4,16 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Survey;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class SurveyController extends Controller
 {
-    // GET /api/surveys (public) — list active surveys
+    /**
+     * GET /api/surveys (public)
+     * Returns all active surveys. Cached in Redis for SURVEY_CACHE_TTL seconds.
+     */
     public function index()
     {
-        $surveys = Survey::active()
-            ->select('id','title','description','status','created_at','updated_at')
-            ->orderBy('id','desc')
-            ->get();
+        $ttl = (int) env('SURVEY_CACHE_TTL', 300);
+        $cacheKey = 'surveys:active';
+
+        $surveys = Cache::remember($cacheKey, $ttl, function () {
+            return Survey::query()
+                ->where('status', 'active')
+                ->select(['id', 'title', 'description', 'status', 'created_at', 'updated_at'])
+                ->orderBy('id')
+                ->get();
+        });
 
         return response()->json([
             'status'  => 'success',
@@ -22,14 +32,39 @@ class SurveyController extends Controller
         ]);
     }
 
-    // GET /api/surveys/{id} (public) — details with questions
+    /**
+     * GET /api/surveys/{id} (public)
+     * Returns survey details with questions. Cached per-survey.
+     */
     public function show($id)
     {
-        $survey = Survey::active()
-            ->with(['questions:id,survey_id,type,question_text,created_at,updated_at'])
-            ->find($id);
+        $ttl = (int) env('SURVEY_CACHE_TTL', 300);
+        $cacheKey = "surveys:show:{$id}";
 
-        if (!$survey) {
+        $payload = Cache::remember($cacheKey, $ttl, function () use ($id) {
+            $survey = Survey::query()
+                ->where('status', 'active')
+                ->find($id);
+
+            if (!$survey) {
+                return null;
+            }
+
+            // lazy load questions only when needed
+            $survey->load(['questions:id,survey_id,type,question_text,created_at,updated_at']);
+
+            return [
+                'id'          => $survey->id,
+                'title'       => $survey->title,
+                'description' => $survey->description,
+                'status'      => $survey->status,
+                'created_at'  => $survey->created_at,
+                'updated_at'  => $survey->updated_at,
+                'questions'   => $survey->questions,
+            ];
+        });
+
+        if (!$payload) {
             return response()->json([
                 'status'  => 'not_found',
                 'message' => 'Survey not found or inactive.',
@@ -40,7 +75,7 @@ class SurveyController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'Survey details',
-            'data'    => $survey,
+            'data'    => $payload,
         ]);
     }
 }
