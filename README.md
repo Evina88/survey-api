@@ -63,7 +63,8 @@ This service allows responders to view surveys, answer questions, and securely a
 
 ## 🎁 Bonus Features
 
-- **Rate limiting** → default 30 requests/min per user/IP (`api` middleware).  
+- **Rate limiting** → default 30 requests/min per user/IP (`api` middleware).
+- **Redis** → use Redis to cache public survey data
 - **Elasticsearch logging** → every submission is pushed asynchronously to the configured index (`survey-submissions`).  
 
 > **Important**: You must run the Postman request **Elasticsearch → “Create index (one-time, safe mapping)”** first.  
@@ -77,7 +78,8 @@ This creates the `survey-submissions` index with correct mapping so mixed answer
 - PHP ≥ 8.3  
 - Composer  
 - MySQL (or MariaDB)  
-- Elasticsearch 8.x 
+- Elasticsearch 8.x
+- Redis 7.x
 
 ---
 ### Steps
@@ -151,6 +153,22 @@ Vars for .env
 - ELASTICSEARCH_TIMEOUT=3
 <br>
 
+### Redis Setup
+
+Vars for .env
+
+- REDIS_HOST=127.0.0.1
+  
+- REDIS_PASSWORD=null
+  
+- REDIS_PORT=6379
+  
+- CACHE_DRIVER=redis
+  
+- SURVEY_CACHE_TTL=300
+  <br>
+  <br>
+
 ### Steps 
 
 1. Install Docker Desktop
@@ -183,7 +201,30 @@ docker run --name es-dev \
     
     docker rm es-dev
 
-    
+  <br>
+
+3. Laragon Setup for Redis
+<br>
+
+Download the right DLL (php_redis-5.3.7-8.3-nts-vs16-x64.zip) from the PECL Windows packages.
+<br>
+<br>
+Extract php_redis.dll and copy it to:
+<br>
+C:\laragon2\bin\php\php-8.3.16-nts-Win32-vs16-x64\ext\
+<br>
+Edit php.ini (Laragon → Menu → PHP → php.ini) and add:
+<br>
+extension=redis
+<br>
+<br>
+Restart Laragon.
+<br>
+<br>
+Run Redis (Docker):
+```bash
+docker run --name redis-dev -p 6379:6379 -d redis:7-alpine
+```  
 
 ---    
 ### 📬 Postman Collection
@@ -215,7 +256,7 @@ survey-api.postman_environment.json → environment variables (base_url, access_
 | /api/login                                           | POST   | ❌   | Login, returns JWT                     |
 | /api/me                                              | GET    | ✅   | Get current responder                  |
 | /api/surveys                                         | GET    | ❌   | List active surveys                    |
-| /api/surveys/{id}                                    | GET    | ✅   | Survey details + questions             |       
+| /api/surveys/{id}                                    | GET    | ❌   | Survey details + questions             |       
 | /api/surveys/{id}/submit                             | POST   | ✅   | Submit survey answers                  |
 | http://localhost:9200/survey-submissions             | PUT    | ❌   | Create index (one-time, safe mapping)  |
 | http://localhost:9200/survey-submissions/_search     | POST   | ❌   | Search submissions by survey_id = 1    |
