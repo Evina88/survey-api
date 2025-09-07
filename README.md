@@ -77,7 +77,7 @@ This creates the `survey-submissions` index with correct mapping so mixed answer
 - PHP ≥ 8.3  
 - Composer  
 - MySQL (or MariaDB)  
-- Elasticsearch 8.x (for bonus logging)  
+- Elasticsearch 8.x 
 
 ---
 ### Steps
@@ -85,16 +85,18 @@ This creates the `survey-submissions` index with correct mapping so mixed answer
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/survey-api.git
+git clone https://github.com/Evina88/survey-api.git
 cd survey-api
 ```
 <br>
+
 **2. Install dependencies**
 
 ```bash
 composer install
 ```
 <br>
+
 **3. Copy the example environment file and set credentials**
 
 ```bash
@@ -121,6 +123,7 @@ php artisan key:generate
 
 - JWT_SECRET=your_jwt_secret_key
 <br>
+
 **4. Run migrations & seeders**
   
 ```bash
@@ -191,14 +194,17 @@ survey-api.postman_collection.json → endpoints (/register, /login, /me, /surve
 
 survey-api.postman_environment.json → environment variables (base_url, access_token, Elasticsearch host/index).
 
-**How to Use**
-Open Postman.
+<br>
 
-Import both JSON files from /postman.
 
-Set base_url (default: http://127.0.0.1:8000).
 
-Register → Login → Token is stored automatically → Access protected endpoints.
+### How to Use
+<br>
+
+1. Open Postman.
+2. Import both JSON files from /postman.
+3. Set base_url (default: http://127.0.0.1:8000).
+4. Register → Login → Token is stored automatically → Access protected endpoints.
 
 ---
 ✅ Endpoints Summary
@@ -216,9 +222,11 @@ Register → Login → Token is stored automatically → Access protected endpoi
 
 ---
 
-📝 Notes
+📝 Notes 
+<br>
+
 Passwords are hashed with bcrypt.
-
+<br>
 JWT tokens are generated with tymon/jwt-auth.
-
+<br>
 Surveys and questions are seeded for immediate testing.
